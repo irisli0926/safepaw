@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pet Profile</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <button id="save-btn" style="display:none;">Save</button>
+  <header>
+    <a href="#" id="edit-btn">Edit</a>
+  </header>
+
+  <div class="centered">
+    <img id="pet-photo" src="https://i.imgur.com/ZkYk4xK.png" alt="Pet Avatar" class="avatar">
+    <input type="file" id="photo-upload" accept="image/*" style="margin-top: 8px; display: none;">
+    <div class="tagline">🐾 Please help me find my home!</div>
+  </div>
+
+  <form id="profile-form">
+    <div class="card centered">
+      <h2><input name="name" type="text" disabled></h2>
+      <p><input name="breed" type="text" disabled></p>
+      <div style="margin-top: 8px;">
+        <label>Gender:
+          <select name="gender" disabled>
+            <option>Female</option>
+            <option>Male</option>
+          </select>
+        </label>
+        <label>Chipped:
+          <select name="chipped" disabled>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">🐶 About Pet</div>
+      <div class="info-tags">
+        <label>Age: <input name="age" type="text" disabled></label>
+        <label>Blood: <input name="blood" type="text" disabled></label>
+        <label>Weight: <input name="weight" type="text" disabled></label>
+        <label>Breed: <input name="breedDetails" type="text" disabled></label>
+        <label>Color: <input name="color" type="text" disabled></label>
+      </div>
+      <textarea name="about" rows="4" style="margin-top: 12px; width: 100%;" disabled></textarea>
+    </div>
+
+    <div class="card">
+      <div class="section-title">📄 Medical History</div>
+
+      <div>
+        <div class="section-title">Allergies (Medication in RED)</div>
+        <textarea name="allergies" rows="2" style="width: 100%; color:black;" disabled></textarea>
+        <textarea name="redMeds" rows="1" style="width: 100%; color:red;" disabled></textarea>
+      </div>
+
+      <div>
+        <div class="section-title">Current Medications</div>
+        <div id="medications-container"></div>
+      </div>
+
+      <div>
+        <div class="section-title">Past Surgeries</div>
+        <div id="surgeries-container"></div>
+      </div>
+
+      <div>
+        <div class="section-title">Chronic Conditions</div>
+        <textarea name="conditions" rows="2" style="width: 100%;" disabled></textarea>
+      </div>
+
+      <div>
+        <div class="section-title">Shots</div>
+        <input name="shots" type="text" style="width: 100%;" disabled>
+      </div>
+
+      <p style="font-size: 12px; color: gray; margin-top: 10px;">
+        Last Updated: <input name="lastUpdated" type="text" disabled>
+      </p>
+    </div>
+  </form>
+
+  <div class="footer-fixed">
+    <p>If you’ve found me, please check below and help contact my family. This means a lot to us!</p>
+    <button class="btn-primary">SEND CURRENT LOCATION TO OWNER</button>
+    <button class="btn-secondary" onclick="window.open('https://www.google.com/maps/search/vet', '_blank')">FIND NEAREST VET</button>
+  </div>
+
+  <!-- Modular Firebase Script -->
+
+  <script type="module">
+    //import { initializeFirebase } from './firebase-init.js';
+    //import { loadPetProfile, savePetProfile, initEditMode } from '../src/app.js';
+    import { db, auth, storage } from './firebase-init.js';
+    import { loadPetProfile, savePetProfile, initEditMode } from './app.js';
+
+    //initializeFirebase();
+    //const { db, auth, storage } = initializeFirebase();
+
+
+    const tagId = new URLSearchParams(window.location.search).get("tag");
+    if (!tagId) {
+      alert("No tag ID found in URL.");
+      throw new Error("Missing tag ID");
+    }
+
+    // Load profile on page load
+    loadPetProfile(tagId);
+
+    // Attach Edit and Save handlers
+    document.getElementById('edit-btn').addEventListener('click', (e) => {
+      e.preventDefault();
+      initEditMode(tagId);
+    });
+
+    document.getElementById('save-btn').addEventListener('click', () => {
+      savePetProfile(tagId);
+    });
+  </script>
+</body>
+</html>

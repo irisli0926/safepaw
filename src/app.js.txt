@@ -1,0 +1,106 @@
+// app.js
+import { auth, db } from './firebase-init.js';
+import {
+  isSignInWithEmailLink,
+  sendSignInLinkToEmail,
+  signInWithEmailLink
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import {
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+// Determine UID from URL
+const pathParts = location.pathname.split('/');
+const uid = pathParts[pathParts.indexOf('pet') + 1];
+
+// DOM references
+const editBtn = document.getElementById('edit-btn');
+const saveBtn = document.getElementById('save-btn');
+const claimForm = document.getElementById('claim-form');
+
+// Utility to enable edit mode
+function setEditMode(on) {
+  document.body.classList.toggle('edit-mode', on);
+  saveBtn.style.display = on ? 'block' : 'none';
+  editBtn.style.display = !on ? 'block' : 'none';
+}
+
+// Load pet data
+async function loadProfile() {
+  const docRef = doc(db, 'pets', uid);
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    populateFields(snap.data());
+  }
+}
+
+// Save edits
+async function saveProfile() {
+  const payload = {
+    name: document.getElementById('pet-name').innerText,
+    breed: document.getElementById('breed').innerText,
+    gender: document.getElementById('gender-select').value,
+    chipped: document.getElementById('chipped-select').value,
+    about: document.getElementById('about').innerText,
+    allergies: document.getElementById('allergies').innerText,
+    medications: document.getElementById('medications').innerText,
+    notes: document.getElementById('notes').innerText,
+    lastUpdated: (new Date()).toLocaleDateString()
+  };
+  await setDoc(doc(db, 'pets', uid), payload, { merge: true });
+  setEditMode(false);
+  loadProfile(); 
+}
+
+// Populate UI fields with data
+function populateFields(data) {
+  document.getElementById('pet-name').innerText = data.name || '—';
+  document.getElementById('breed').innerText = data.breed || '—';
+  document.getElementById('gender-select').value = data.gender || '';
+  document.getElementById('chipped-select').value = data.chipped || '';
+  document.getElementById('about').innerText = data.about || '';
+  document.getElementById('allergies').innerText = data.allergies || '';
+  document.getElementById('medications').innerText = data.medications || '';
+  document.getElementById('notes').innerText = data.notes || '';
+  document.getElementById('last-updated').innerText = data.lastUpdated || '';
+}
+
+// Handle claim form
+claimForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const email = e.target.email.value;
+  const actionCodeSettings = {
+    url: location.href + "?edit=true",
+    handleCodeInApp: true
+  };
+  await sendSignInLinkToEmail(auth, email, actionCodeSettings);
+  alert("Magic link sent! Check your email.");
+  localStorage.setItem('claimEmail', email);
+});
+
+// Check auth on load
+window.addEventListener('load', async () => {
+  await loadProfile();
+
+  if (isSignInWithEmailLink(auth, window.location.href)) {
+    let email = localStorage.getItem('claimEmail') ||
+      prompt("Enter your email to complete setup:");
+    await signInWithEmailLink(auth, email, window.location.href);
+    localStorage.removeItem('claimEmail');
+    setEditMode(true);
+  } else if (new URLSearchParams(location.search).has('edit')) {
+    const user = auth.currentUser;
+    if (user) setEditMode(true);
+  }
+});
+
+// Button handlers
+editBtn.addEventListener('click', () => {
+  setEditMode(true);
+});
+
+saveBtn.addEventListener('click', () => {
+  saveProfile();
+});

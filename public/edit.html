@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Edit Pet Info</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #fffaf4;
+    }
+
+    .header {
+      padding: 16px;
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      background-color: #ffcf91;
+    }
+
+    iframe {
+      width: 100%;
+      height: calc(100vh - 48px);
+      border: none;
+    }
+
+    .error {
+      padding: 20px;
+      text-align: center;
+      color: #a33;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">Editing Your Pet's Info 🐾</div>
+  <div id="form-container"></div>
+
+  <script>
+    // ✅ Replace with your actual Google Form base URL
+    const formBaseURL = "https://docs.google.com/forms/d/e/1FAIpQLSf_yourFormId/viewform";
+
+    // ✅ Replace with your actual Google Form field for tagId
+    const tagIdEntry = "entry.123456789"; // ← your prefill field
+
+    // Get tagId from URL (use `?tag=PET123`)
+    const params = new URLSearchParams(window.location.search);
+    const tagId = params.get("tag");
+
+    if (tagId) {
+      const prefillURL = `${formBaseURL}?${tagIdEntry}=${encodeURIComponent(tagId)}`;
+      const iframe = document.createElement("iframe");
+      iframe.src = prefillURL;
+      document.getElementById("form-container").appendChild(iframe);
+    } else {
+      document.getElementById("form-container").innerHTML = `
+        <div class="error">⚠️ Missing tag ID. Please scan your tag again or use a valid link.</div>
+      `;
+    }
+  </script>
+
+</body>
+</html>

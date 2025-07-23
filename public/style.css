@@ -1,0 +1,137 @@
+/* General Layout */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: #fffaf4;
+  color: #333;
+  padding-bottom: 140px;
+}
+
+/* Header */
+header {
+  padding: 16px;
+  text-align: right;
+  font-size: 14px;
+}
+
+/* Centered Pet Image + Tagline */
+.centered {
+  text-align: center;
+  margin-top: 20px;
+}
+.avatar {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.tagline {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 12px 0;
+}
+
+/* Card Blocks */
+.card {
+  background-color: #fff;
+  margin: 12px;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Section Titles */
+.section-title {
+  font-weight: bold;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+
+/* Tags & Labels */
+.info-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.info-tags label {
+  background-color: #ffcf91;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 12px;
+}
+
+/* Input + Textarea Styles */
+input, select, textarea {
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-family: inherit;
+  font-size: 14px;
+  width: auto;
+}
+input:disabled, select:disabled, textarea:disabled {
+  background-color: transparent;
+  border: none;
+  color: inherit;
+}
+input:enabled, select:enabled, textarea:enabled {
+  background-color: #fff5dc;
+  border: 1px solid #ccc;
+}
+
+/* Medication + Surgery Grid */
+.med-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin: 6px 0;
+}
+
+/* Footer */
+.footer-fixed {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: #fdb85d;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+}
+.footer-fixed p {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+.footer-fixed button {
+  width: 90%;
+  margin: 4px auto;
+  padding: 12px;
+  font-size: 15px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  display: block;
+  color: white;
+  cursor: pointer;
+}
+.btn-primary {
+  background-color: #ff7e3d;
+}
+.btn-secondary {
+  background-color: #d7472f;
+}
+
+/* Save Button */
+#save-btn {
+  position: fixed;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 10px 16px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  display: none;
+  z-index: 1000;
+}

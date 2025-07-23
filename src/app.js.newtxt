@@ -1,0 +1,129 @@
+// editMode.js
+// import { auth, db } from './firebase-init.js';
+import { auth, db, storage } from './firebase-init.js';
+
+import {
+  isSignInWithEmailLink,
+  sendSignInLinkToEmail,
+  signInWithEmailLink
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import {
+  doc,
+  getDoc,
+  setDoc
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+
+// Load pet profile based on tag ID
+export async function loadPetProfile(tagId) {
+  const docRef = doc(db, 'pets', tagId);
+  const snap = await getDoc(docRef);
+  if (snap.exists()) {
+    const data = snap.data(); // ✅ ADD THIS LINE
+    populateFields(data);
+
+    if (data.photoURL) {
+      document.getElementById('pet-photo').src = data.photoURL;
+    }
+  } else {
+    console.warn("No pet found with tag:", tagId);
+  }
+}
+
+
+
+// Save edited fields to Firestore
+export async function savePetProfile(tagId) {
+  const form = document.getElementById('profile-form');
+  const data = Object.fromEntries(new FormData(form).entries());
+  data.lastUpdated = new Date().toLocaleDateString();
+
+  // Save dynamic lists (medications, surgeries)
+  data.medications = getDynamicEntries('medications-container');
+  data.surgeries = getDynamicEntries('surgeries-container');
+
+  await setDoc(doc(db, 'pets', tagId), data, { merge: true });
+  disableAllInputs();
+  document.getElementById('save-btn').style.display = 'none';
+  alert("Profile saved!");
+}
+
+// Enable edit mode
+export function initEditMode(tagId) {
+  document.querySelectorAll('input, textarea, select').forEach(el => {
+    el.disabled = false;
+  });
+  document.getElementById('save-btn').style.display = 'block';
+
+  enablePhotoUpload(tagId); // ✅ Only works if tagId is passed in
+}
+
+
+// Utility to disable all inputs
+function disableAllInputs() {
+  document.querySelectorAll('input, textarea, select').forEach(el => {
+    el.disabled = true;
+  });
+}
+
+// Populate form fields with pet data
+function populateFields(data) {
+  const form = document.getElementById('profile-form');
+  for (let [key, value] of Object.entries(data)) {
+    const el = form.elements[key];
+    if (el) el.value = value;
+  }
+
+  // Load meds/surgeries arrays
+  setDynamicEntries('medications-container', data.medications || []);
+  setDynamicEntries('surgeries-container', data.surgeries || []);
+}
+
+// Dynamic input helpers
+function setDynamicEntries(containerId, items) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  for (const pair of items) {
+    const row = document.createElement('div');
+    row.className = 'med-row';
+    row.innerHTML = `
+      <input type="text" value="${pair[0] || ''}" />
+      <input type="text" value="${pair[1] || ''}" />
+    `;
+    container.appendChild(row);
+  }
+}
+
+function getDynamicEntries(containerId) {
+  const rows = document.getElementById(containerId).querySelectorAll('.med-row');
+  return Array.from(rows).map(row => {
+    const inputs = row.querySelectorAll('input');
+    return [inputs[0].value, inputs[1].value];
+  });
+}
+
+import { storage } from './firebase-init.js';
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js";
+
+export async function enablePhotoUpload(tagId) {
+  const photoInput = document.getElementById('photo-upload');
+  photoInput.style.display = 'block';
+
+  photoInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const storageRef = ref(storage, `petPhotos/${tagId}`);
+    await uploadBytes(storageRef, file);
+    const photoURL = await getDownloadURL(storageRef);
+
+    // Set preview
+    document.getElementById('pet-photo').src = photoURL;
+
+    // Save to Firestore
+    await setDoc(doc(db, 'pets', tagId), { photoURL }, { merge: true });
+  });
+}

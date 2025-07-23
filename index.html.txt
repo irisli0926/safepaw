@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pet Profile</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #fffaf4;
+      color: #333;
+      padding-bottom: 140px;
+    }
+    header {
+      padding: 16px;
+      text-align: right;
+      font-size: 14px;
+    }
+    .centered {
+      text-align: center;
+    }
+    .avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .tagline {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 12px 0;
+    }
+    .card {
+      background-color: #fff;
+      margin: 12px;
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .tag {
+      background-color: #ffcf91;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+    .section-title {
+      font-weight: bold;
+      margin-top: 16px;
+      margin-bottom: 8px;
+    }
+    .med-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin: 6px 0;
+    }
+    .footer-fixed {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: #fdb85d;
+      padding: 12px;
+      text-align: center;
+      box-shadow: 0 -2px 6px rgba(0,0,0,0.1);
+    }
+    .footer-fixed p {
+      margin: 0 0 8px;
+      font-size: 13px;
+    }
+    .footer-fixed button {
+      width: 90%;
+      margin: 4px auto;
+      padding: 12px;
+      font-size: 15px;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      display: block;
+      color: white;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background-color: #ff7e3d;
+    }
+    .btn-secondary {
+      background-color: #d7472f;
+    }
+    #save-btn {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 10px 16px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      display: none;
+      z-index: 1000;
+    }
+    input:disabled, select:disabled, textarea:disabled {
+      background-color: transparent;
+      border: none;
+      color: inherit;
+    }
+    input:enabled, select:enabled, textarea:enabled {
+      background-color: #fff5dc;
+    }
+    input, select, textarea {
+      border-radius: 6px;
+      padding: 4px 6px;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .info-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .info-tags label {
+      background-color: #ffcf91;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <button id="save-btn" onclick="saveEdits()">Save</button>
+  <header>
+    <a href="#" onclick="toggleEdit(event)">Edit</a>
+  </header>
+  <div class="centered">
+    <img src="https://i.imgur.com/ZkYk4xK.png" alt="Pet Avatar" class="avatar">
+    <div class="tagline">🐾 Please help me find my home!</div>
+  </div>
+
+  <form id="profile-form">
+    <div class="card centered">
+      <h2><input type="text" value="Bella" disabled></h2>
+      <p><input type="text" value="Border Collie" disabled></p>
+      <div style="margin-top: 8px;">
+        <label>Gender:
+          <select disabled>
+            <option>Female</option>
+            <option>Male</option>
+          </select>
+        </label>
+        <label>Chipped:
+          <select disabled>
+            <option>Yes</option>
+            <option>No</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">🐶 About Bella</div>
+      <div class="info-tags">
+        <label>Age: <input type="text" value="2 yrs" disabled></label>
+        <label>Blood: <input type="text" value="DEA 1" disabled></label>
+        <label>Weight: <input type="text" value="5 kg" disabled></label>
+        <label>Breed: <input type="text" value="Golden Retriever" disabled></label>
+        <label>Color: <input type="text" value="Golden" disabled></label>
+      </div>
+      <textarea rows="4" style="margin-top: 12px; width: 100%;" disabled>Bella is a talkative and loyal angel who loves hanging out with people. Notes: She may bark when scared — please approach slowly.</textarea>
+    </div>
+
+    <div class="card">
+      <div class="section-title">📄 Bella’s Medical History</div>
+
+      <div>
+        <div class="section-title">Allergies (Medication in RED)</div>
+        <textarea rows="2" style="width: 100%; color:black;" disabled>Chicken, Cheese, Chicken Liver</textarea>
+        <textarea rows="1" style="width: 100%; color:red;" disabled>Cetirizine</textarea>
+      </div>
+
+      <div>
+        <div class="section-title">Current Medications</div>
+        <div class="med-row"><input type="text" value="Apoquel" disabled><input type="text" value="0.6 mg; 2/day" disabled></div>
+        <div class="med-row"><input type="text" value="NexGard" disabled><input type="text" value="0.3 mg; 1/day" disabled></div>
+      </div>
+
+      <div>
+        <div class="section-title">Past Surgeries</div>
+        <div class="med-row"><input type="text" value="Tumor Removal" disabled><input type="text" value="02/18/2023" disabled></div>
+      </div>
+
+      <div>
+        <div class="section-title">Chronic Conditions</div>
+        <textarea rows="2" style="width: 100%;" disabled>Arthritis
+Hypothyroidism</textarea>
+      </div>
+
+      <div>
+        <div class="section-title">Shots</div>
+        <input type="text" value="Rabies, DHPP" style="width: 100%;" disabled>
+      </div>
+
+      <p style="font-size: 12px; color: gray; margin-top: 10px;">Last Updated: <input type="text" value="06/09/2025" disabled></p>
+    </div>
+  </form>
+
+  <div class="footer-fixed">
+    <p>If you’ve found me, please check below and help contact my family. This means a lot to us!</p>
+    <button class="btn-primary">SEND CURRENT LOCATION TO OWNER</button>
+    <button class="btn-secondary" onclick="window.open('https://www.google.com/maps/search/vet', '_blank')">FIND NEAREST VET</button>
+  </div>
+
+  <script>
+    let editMode = false;
+
+    function toggleEdit(e) {
+      e.preventDefault();
+      editMode = !editMode;
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.disabled = !editMode;
+      });
+      document.getElementById('save-btn').style.display = editMode ? 'block' : 'none';
+    }
+
+    function saveEdits() {
+      editMode = false;
+      document.querySelectorAll('input, textarea, select').forEach(el => {
+        el.disabled = true;
+      });
+      document.getElementById('save-btn').style.display = 'none';
+      alert("Changes saved successfully!");
+    }
+  </script>
+</body>
+</html>
+<script type="module" src="firebase-config.js"></script>
+<script type="module" src="script.js"></script>
+<script type="module">
+  import { loadPetProfile, initEditMode, savePetProfile } from '../src/app.js';
+  import { initializeFirebase } from './firebase-init.js';
+
+  initializeFirebase(); // optional if not auto in init file
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const tagId = urlParams.get("tag");
+
+  if (tagId) {
+    loadPetProfile(tagId); // 🔄 Load data from Firestore
+  }
+
+  window.saveEdits = () => {
+    savePetProfile(tagId); // 🔐 Save to Firestore
+  };
+
+  window.toggleEdit = (e) => {
+    e.preventDefault();
+    initEditMode();
+  };
+</script>
+

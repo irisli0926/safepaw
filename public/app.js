@@ -1,13 +1,10 @@
-// app.js
 import { auth, db, storage } from './firebase-init.js';
-import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js';
-import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-storage.js';
+import { doc, getDoc, setDoc } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js';
 import {
-  isSignInWithEmailLink,
-  sendSignInLinkToEmail,
-  signInWithEmailLink,
+  signInWithEmailAndPassword,
   onAuthStateChanged
-} from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js';
+} from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
 
 let currentUser = null;
 
@@ -47,7 +44,7 @@ export async function savePetProfile(tagId) {
 
 export function initEditMode(tagId) {
   if (!currentUser) {
-    promptForEmailSignIn();
+    promptForEmailPasswordSignIn();
     return;
   }
 
@@ -93,42 +90,27 @@ function getDynamicEntries(containerId) {
     .map(row => Array.from(row.querySelectorAll('input')).map(input => input.value));
 }
 
-// Prompt for magic link sign-in
-function promptForEmailSignIn() {
-  const email = prompt("Enter your email to claim this profile:");
-  if (!email) return;
+// 🔑 Prompt for email/password login
+function promptForEmailPasswordSignIn() {
+  const email = prompt("Enter your email:");
+  const password = prompt("Enter your password:");
+  if (!email || !password) return;
 
-  const actionSettings = {
-    url: window.location.href,
-    handleCodeInApp: true
-  };
-
-  sendSignInLinkToEmail(auth, email, actionSettings)
-    .then(() => {
-      alert("Check your inbox for the magic link.");
-      localStorage.setItem('claimEmail', email);
+  signInWithEmailAndPassword(auth, email, password)
+    .then(result => {
+      currentUser = result.user;
+      alert("Signed in! You can now edit.");
     })
-    .catch(console.error);
+    .catch(err => {
+      console.error("Login failed:", err);
+      alert("Failed to sign in. " + err.message);
+    });
 }
 
-// Auto complete sign-in if returning from email link
-window.addEventListener('load', async () => {
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUser = user;
-      console.log("Signed in as:", user.email);
-    }
-  });
-
-  if (isSignInWithEmailLink(auth, window.location.href)) {
-    let email = localStorage.getItem('claimEmail') || prompt("Please enter your email again:");
-    try {
-      const result = await signInWithEmailLink(auth, email, window.location.href);
-      currentUser = result.user;
-      localStorage.removeItem('claimEmail');
-      alert("Signed in! You can now edit.");
-    } catch (err) {
-      console.error("Sign-in error:", err);
-    }
+// 🔁 Track auth state
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    console.log("Signed in as:", user.email);
   }
 });

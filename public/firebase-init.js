@@ -1,8 +1,10 @@
 // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics.js";
+import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getStorage } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
 
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
@@ -25,14 +27,31 @@ const firebaseConfig = {
 // const auth = getAuth(app);
 // const db = getFirestore(app);
 
-export function initializeFirebase() {
-  const app = initializeApp(firebaseConfig);
-  return {
-    auth: getAuth(app),
-    db: getFirestore(app),
-    storage: getStorage(app),
-    analytics: getAnalytics(app)
-  };
-}
+// export function initializeFirebase() {
+//   const app = initializeApp(firebaseConfig);
+//   return {
+//     auth: getAuth(app),
+//     db: getFirestore(app),
+//     storage: getStorage(app),
+//     analytics: getAnalytics(app)
+//   };
+// }
 
 // export { db, auth, analytics };
+
+// ✅ Initialize Firebase once
+const app = initializeApp(firebaseConfig);
+
+// ✅ Create SDK instances once
+const auth = getAuth(app);
+const db = getFirestore(app);
+const storage = getStorage(app);
+const analytics = getAnalytics(app);
+
+// ✅ Function that returns all instances
+export function initializeFirebase() {
+  return { auth, db, storage, analytics };
+}
+
+// ✅ Also export individual instances
+export { auth, db, storage, analytics };

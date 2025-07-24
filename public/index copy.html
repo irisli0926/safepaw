@@ -16,20 +16,17 @@
 
 <body>
 
-
-
   <!-- Show if tag is invalid -->
   <div id="error-section" style="display: none;">
     <h2>Invalid Tag</h2>
     <p>This tag ID doesn't exist. Please contact support.</p>
   </div>
 
-  <!-- Login Section -->
-  <div id="login-section" style="display:none;">
-    <h2>Login to Edit</h2>
-    <input type="email" id="login-email" placeholder="Email" />
-    <input type="password" id="login-password" placeholder="Password" />
-    <button id="login-btn">Login</button>
+  <!-- Claim Section -->
+  <div id="claim-section" style="display:none;">
+    <h2>Claim this tag</h2>
+    <input type="email" id="claim-email" placeholder="your@email.com" />
+    <button id="claim-btn">Send Login Link</button>
   </div>
 
 
@@ -37,9 +34,6 @@
   <div id="profile-section" style="display: none;">
 
     <button id="save-btn" style="display:none;">Save</button>
-
-    <button id="logout-btn" style="position: fixed; top: 100px; right: 10px; display: none;">Logout</button>
-
     <header>
       <a href="#" id="edit-btn">Edit</a>
     </header>
@@ -130,55 +124,69 @@
   <script type="module">
     import { db, auth, storage } from './firebase-init.js';
     import { loadPetProfile, savePetProfile, initEditMode } from './app.js';
-    //import { checkAuth, sendMagicLink, completeSignIn } from './auth.js';
+    import { checkAuth, sendMagicLink, completeSignIn } from './auth.js';
   // inside <script type="module">
     import { getDoc, setDoc, doc, collection } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
-    import { signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-    
     async function main() {
-  const tagId = new URLSearchParams(window.location.search).get("tag") || "test-tag";
-  const tagRef = doc(db, "pets", tagId);
-  const tagSnap = await getDoc(tagRef);
+      await completeSignIn(); // handle magic link sign-in if present
 
-  if (!tagSnap.exists()) {
-    document.getElementById("error-section").style.display = "block";
-    return;
-  }
 
-  const data = tagSnap.data();
+        // 🔐 Wait until Firebase Auth fully resolves the user
+      await new Promise((resolve) => {
+        const unsub = auth.onAuthStateChanged((user) => {
+          if (user) {
+            unsub();
+            resolve();
+          }
+        });
+      });
+      
+      const tagId = localStorage.getItem("tagForLogin") || new URLSearchParams(window.location.search).get("tag") || "test-tag";
 
-  // 👇 Moved logic inside auth observer
-  onAuthStateChanged(auth, async (user) => {
-  const tagId = new URLSearchParams(window.location.search).get("tag") || "test-tag";
-  const tagRef = doc(db, "pets", tagId);
-  const tagSnap = await getDoc(tagRef);
+      const tagRef = doc(db, "pets", tagId);
+      const tagSnap = await getDoc(tagRef);
+      
+      if (!tagSnap.exists()) {
+        document.getElementById("error-section").style.display = "block";
+        return;
+      }
 
-  if (!tagSnap.exists()) {
-    document.getElementById("error-section").style.display = "block";
-    return;
-  }
+      const data = tagSnap.data();
+      const user = await checkAuth();
 
-  const data = tagSnap.data();
-
-  if (user) {
-    console.log("✅ Signed in as:", user.email);
-
-    document.getElementById("logout-btn").style.display = "block";
-    document.getElementById("login-section").style.display = "none";
-
-    if (data.status === "unclaimed") {
-      await setDoc(tagRef, {
-        status: "claimed",
-        claimedBy: user.email
-      }, { merge: true });
-    }
+      if (data.status === "unclaimed" && user?.email) {
+    // ✅ Auto-claim the tag for signed-in user
+    await setDoc(doc(db, "pets", tagId), {
+      status: "claimed",
+      claimedBy: user.email
+    }, { merge: true });
 
     document.getElementById("profile-section").style.display = "block";
     loadPetProfile(tagId);
 
-    if (user.email === data.claimedBy || data.status === "unclaimed") {
+    document.getElementById("edit-btn").style.display = "block";
+    document.getElementById("edit-btn").addEventListener("click", () => {
+      initEditMode(tagId);
+    });
+    document.getElementById("save-btn").addEventListener("click", () => {
+      savePetProfile(tagId);
+    });
+
+  } else if (data.status === "unclaimed") {
+    // 👤 Not signed in — show claim UI
+    document.getElementById("claim-section").style.display = "block";
+    document.getElementById("claim-btn").addEventListener("click", () => {
+      const email = document.getElementById("claim-email").value;
+      sendMagicLink(email, tagId);
+    });
+
+  } else {
+    // ✅ Already claimed — load profile normally
+    document.getElementById("profile-section").style.display = "block";
+    loadPetProfile(tagId);
+
+    if (user?.email === data.claimedBy) {
       document.getElementById("edit-btn").style.display = "block";
       document.getElementById("edit-btn").addEventListener("click", () => {
         initEditMode(tagId);
@@ -187,76 +195,11 @@
         savePetProfile(tagId);
       });
     }
-
-  } else {
-    console.log("🚫 Not signed in");
-    document.getElementById("logout-btn").style.display = "none";
-    document.getElementById("edit-btn").style.display = "none";
-    document.getElementById("save-btn").style.display = "none";
-
-    if (data.status === "claimed") {
-      document.getElementById("login-section").style.display = "block";
-      document.getElementById("login-btn").addEventListener("click", async () => {
-        const email = document.getElementById("login-email").value;
-        const password = document.getElementById("login-password").value;
-        try {
-          await signInWithEmailAndPassword(auth, email, password);
-        } catch (err) {
-          alert("Login failed: " + err.message);
-        }
-      });
-    }
-
-    // Still show read-only profile
-        if (data.status === "claimed") {
-      // Show read-only view only if already claimed
-      document.getElementById("profile-section").style.display = "block";
-      loadPetProfile(tagId);
-    } else {
-      // Tag is unclaimed and user not logged in
-      document.getElementById("error-section").style.display = "block";
-    }
+  }
 
   }
-});
-
-}
-
-import { signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-
-document.getElementById("logout-btn").addEventListener("click", async () => {
-  try {
-    await signOut(auth);
-    localStorage.clear();
-    alert("You’ve been signed out.");
-    location.reload(); // or redirect to clean page
-  } catch (err) {
-    console.error("Sign-out error:", err);
-  }
-});
 
   main();
-
-
-// Auto logout after 10 minutes of inactivity
-  let inactivityTimer;
-
-  function resetInactivityTimer() {
-    clearTimeout(inactivityTimer);
-    inactivityTimer = setTimeout(() => {
-      auth.signOut().then(() => {
-        alert("You've been logged out due to inactivity.");
-        location.reload();
-      });
-    }, 10 * 60 * 1000); // 10 minutes
-  }
-
-  ['mousemove', 'keydown', 'click', 'touchstart'].forEach(evt =>
-    document.addEventListener(evt, resetInactivityTimer)
-  );
-
-  resetInactivityTimer();
-
 </script>
 
 

@@ -1,7 +1,23 @@
 
 网页：测试你适合什么石头
 
+NFC tag tapped →
 
+index.html loads with ?tag=abc123 →
+
+loadPetProfile(tagId) from app.js →
+
+One of:
+
+📩 Claim screen → Auth → Edit mode
+
+👁 View mode → Auth → Edit mode if owner
+
+🛑 View mode → Cannot edit (not owner)
+
+Save profile → data stored
+
+Edit later? → same flow with email auth
 
 
 ## 🧩 你的目标（总结）

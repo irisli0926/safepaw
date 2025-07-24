@@ -24,20 +24,27 @@
     <p>This tag ID doesn't exist. Please contact support.</p>
   </div>
 
+  <!-- Claim Section
+  <div id="claim-section" style="display:none;">
+    <h2>Claim this tag</h2>
+    <input type="email" id="claim-email" placeholder="your@email.com" />
+    <button id="claim-btn">Send Login Link</button>
+  </div> -->
+
   <!-- Login Section -->
-  <div id="login-section" style="display:none;">
-    <h2>Login to Edit</h2>
-    <input type="email" id="login-email" placeholder="Email" />
-    <input type="password" id="login-password" placeholder="Password" />
-    <button id="login-btn">Login</button>
-  </div>
+<div id="login-section" style="display:none;">
+  <h2>Login to Edit</h2>
+  <input type="email" id="login-email" placeholder="Email" />
+  <input type="password" id="login-password" placeholder="Password" />
+  <button id="login-btn">Login</button>
+</div>
 
 
   <!-- Show after claimed -->
   <div id="profile-section" style="display: none;">
 
     <button id="save-btn" style="display:none;">Save</button>
-
+    
     <button id="logout-btn" style="position: fixed; top: 100px; right: 10px; display: none;">Logout</button>
 
     <header>
@@ -208,15 +215,8 @@
     }
 
     // Still show read-only profile
-        if (data.status === "claimed") {
-      // Show read-only view only if already claimed
-      document.getElementById("profile-section").style.display = "block";
-      loadPetProfile(tagId);
-    } else {
-      // Tag is unclaimed and user not logged in
-      document.getElementById("error-section").style.display = "block";
-    }
-
+    document.getElementById("profile-section").style.display = "block";
+    loadPetProfile(tagId);
   }
 });
 
